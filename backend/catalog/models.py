@@ -12,7 +12,7 @@ class Singer(models.Model):
     name = models.CharField(
         max_length=50,
         unique=True,
-        help_text='Название команды',
+        help_text='Название исполнителя',
         verbose_name='Название',
     )
 
