@@ -1,5 +1,5 @@
 import logging
-from typing import Collection, Optional
+from typing import Collection, Iterable, Optional
 
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -114,6 +114,18 @@ class AlbumSong(models.Model):
         help_text='Номер песни в альбоме',
         verbose_name='Номер',
     )
+
+#    def save(self):
+#        print('save')
+#        print(self.__dict__)
+#        values = list(AlbumSong.objects.filter(album_id=self.album_id)
+#                      .exclude(song_id=self.song_id)
+#                      .values_list('number', flat=True))
+#        values.append(self.number)
+#        if len(values) != len(set(values)):
+#            raise ValidationError('Недопустим одинаковый номер песни')
+#            return
+#        return super().save()
 
 #    def clean(self):
 #        values = list(AlbumSong.objects.filter(album_id=self.album_id)
