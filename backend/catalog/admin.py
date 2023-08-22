@@ -1,13 +1,20 @@
-import logging
-
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
 
-from catalog.models import Singer
+from catalog.models import Album, AlbumSong, Singer, Song
 
 
-logger = logging.getLogger(__name__)
+class AlbumSongInline(admin.TabularInline):
+    model = AlbumSong
+    extra = 0
 
-admin.site.register(Singer)
+
+class AlbumAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'singer', 'year')
+    inlines = (AlbumSongInline,)
+
+
+admin.site.register(Album, AlbumAdmin)
+
 admin.site.unregister(User)
 admin.site.unregister(Group)
