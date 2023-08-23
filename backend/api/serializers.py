@@ -36,6 +36,7 @@ class AlbumSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'singer', 'year', 'songs')
         model = Album
 
+    @transaction.atomic
     def create(self, validated_data):
         singer_id = self.initial_data.pop('singer')
         try:
@@ -71,15 +72,34 @@ class AlbumSerializer(serializers.ModelSerializer):
             )
         return album
 
-    # @transaction.atomic
+    @transaction.atomic
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.year = validated_data.get('year', instance.year)
         if 'singer' in self.initial_data:
             instance.singer_id = self.initial_data['singer']
 
+        try:
+            singer = Singer.objects.get(pk=instance.singer_id)
+        except ObjectDoesNotExist:
+            raise serializers.ValidationError(
+                detail=f'Не найден исполнитель с id={instance.singer_id}.',
+                code=status.HTTP_400_BAD_REQUEST,
+            )
+
         songs = self.initial_data.get('songs')
         if songs is not None:
+
+            try:
+                for item in songs:
+                    item_id = item['song']
+                    Song.objects.get(pk=item_id)
+            except ObjectDoesNotExist:
+                raise serializers.ValidationError(
+                    detail=f'Не существует песня c id={item_id}.',
+                    code=status.HTTP_400_BAD_REQUEST,
+                )
+
             AlbumSong.objects.filter(album=instance).exclude(
                 song__in=[song['song'] for song in songs]
             ).delete()
@@ -89,5 +109,5 @@ class AlbumSerializer(serializers.ModelSerializer):
                     song_id=song['song'],
                     defaults={"number": song['number']}
                 )
-        instance.save()
+            instance.save()
         return instance
