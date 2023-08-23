@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from rest_framework import serializers
 from rest_framework import status
 
@@ -69,3 +70,24 @@ class AlbumSerializer(serializers.ModelSerializer):
                 number=item['number']
             )
         return album
+
+    # @transaction.atomic
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.year = validated_data.get('year', instance.year)
+        if 'singer' in self.initial_data:
+            instance.singer_id = self.initial_data['singer']
+
+        songs = self.initial_data.get('songs')
+        if songs is not None:
+            AlbumSong.objects.filter(album=instance).exclude(
+                song__in=[song['song'] for song in songs]
+            ).delete()
+            for song in songs:
+                AlbumSong.objects.update_or_create(
+                    album=instance,
+                    song_id=song['song'],
+                    defaults={"number": song['number']}
+                )
+        instance.save()
+        return instance
