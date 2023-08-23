@@ -115,6 +115,9 @@ class AlbumSong(models.Model):
         verbose_name='Номер',
     )
 
+    def __str__(self):
+        return f'{self.song}({self.album})'
+
 #    def save(self):
 #        print('save')
 #        print(self.__dict__)
@@ -134,6 +137,3 @@ class AlbumSong(models.Model):
 #            print(f'Повтор. {self.album_id} {self.song_id} {self.number} {values}')
 #            raise ValidationError('Недопустим одинаковый номер песни')
 #        print(f'ok {self.album_id} {self.song_id} {self.number} {values}')
-
-    def __str__(self):
-        return f'{self.song}({self.album})'
